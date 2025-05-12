@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Lensflare, LensflareElement } from "three/examples/jsm/objects/Lensflare.js";
+import {
+	Lensflare,
+	LensflareElement,
+} from "three/examples/jsm/objects/Lensflare.js";
 
 const stars: THREE.Sprite[] = [];
 
@@ -18,7 +21,7 @@ const camera = new THREE.PerspectiveCamera(
 	60,
 	window.innerWidth / window.innerHeight,
 	1,
-	50000
+	50000,
 );
 camera.position.set(0, 300, 400);
 
@@ -79,7 +82,7 @@ const sunMaterial = new THREE.SpriteMaterial({
 	color: 0xffffcc, // 少し黄色味を加えて白さを抑える
 	transparent: true,
 	blending: THREE.AdditiveBlending,
-	opacity: 0.8 // 透明度を追加して強度を下げる
+	opacity: 0.8, // 透明度を追加して強度を下げる
 });
 const sunMesh = new THREE.Sprite(sunMaterial);
 sunMesh.scale.set(4000, 4000, 1); // サイズを少し小さくする
@@ -140,11 +143,11 @@ const cloudMaterial = new THREE.MeshLambertMaterial({
 	transparent: true,
 	opacity: 1, // さらに透明度を上げて強度を下げる
 	color: 0xf0f0f0, // 少し色を落として白さを抑える
-	blending: THREE.AdditiveBlending
+	blending: THREE.AdditiveBlending,
 });
 const cloudMesh = new THREE.Mesh(
 	new THREE.SphereGeometry(100.5, 64, 64),
-	cloudMaterial
+	cloudMaterial,
 );
 
 // 地球グループの作成とシーンへの追加
@@ -184,7 +187,7 @@ const starMaterial = new THREE.SpriteMaterial({
 	color: 0xffffff,
 	transparent: true,
 	blending: THREE.AdditiveBlending,
-	opacity: 0.7 // 透明度を追加して強度を下げる
+	opacity: 0.7, // 透明度を追加して強度を下げる
 });
 for (let i = 0; i < 10000; i++) {
 	const sprite = new THREE.Sprite(starMaterial);
@@ -196,7 +199,7 @@ for (let i = 0; i < 10000; i++) {
 	sprite.position.set(
 		radius * sintheta * Math.cos(phi),
 		radius * costheta,
-		radius * sintheta * Math.sin(phi)
+		radius * sintheta * Math.sin(phi),
 	);
 	const scaleVal = rand(2, 10);
 	sprite.scale.set(scaleVal, scaleVal, 1);
