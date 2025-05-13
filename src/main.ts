@@ -7,10 +7,8 @@ import {
 
 const stars: THREE.Sprite[] = [];
 
-/**
- * コンテナのDOM要素を取得
- */
-const container = document.getElementById("container");
+/** コンテナのDOM要素 */
+const container = document.getElementById("container")!;
 
 // シーン作成
 const scene = new THREE.Scene();
@@ -23,18 +21,12 @@ const camera = new THREE.PerspectiveCamera(
   1,
   50000,
 );
-camera.position.set(-100, 50, 300); // 地球の真後ろから少し斜めにずらす
+camera.position.set(-300, 200, 300); // 地球の真後ろから少し斜めにずらす
 
 // レンダラーの設定
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-// シャドウマップを有効化
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-if (!container) {
-  throw new Error("container is null");
-}
 container.appendChild(renderer.domElement);
 
 // OrbitControlsの初期化
@@ -46,26 +38,21 @@ controls.maxDistance = 3000;
 controls.autoRotate = true;
 
 // 環境光の設定
-const ambient = new THREE.AmbientLight(0xffffff, 0.01);
-scene.add(ambient);
+scene.add(new THREE.AmbientLight(0xffffff, 0.005));
 
 // 太陽光（ポイントライト）の設定
-const pointLight = new THREE.PointLight(0xffffff, 100.0, 0);
+const pointLight = new THREE.PointLight(0xffffff, 100.0, 0, 2);
 pointLight.position.set(10000, 0, 0);
 // シャドウを有効化
 pointLight.castShadow = true;
-// シャドウの品質設定
-pointLight.shadow.mapSize.width = 2048;
-pointLight.shadow.mapSize.height = 2048;
-pointLight.shadow.camera.near = 500;
-pointLight.shadow.camera.far = 15000;
+
 // 減衰設定を調整して地球に十分な光が当たるようにする
 pointLight.decay = 0.5; // 少し減衰を追加
 scene.add(pointLight);
 
 // Skyboxの設定
 const cubeLoader = new THREE.CubeTextureLoader();
-const skyBoxTexture = cubeLoader.load([
+scene.background = cubeLoader.load([
   "textures/skybox/space_posX.jpg",
   "textures/skybox/space_negX.jpg",
   "textures/skybox/space_posY.jpg",
@@ -73,7 +60,6 @@ const skyBoxTexture = cubeLoader.load([
   "textures/skybox/space_posZ.jpg",
   "textures/skybox/space_negZ.jpg",
 ]);
-scene.background = skyBoxTexture;
 
 // 太陽スプライトの作成
 const textureLoader = new THREE.TextureLoader();
@@ -90,35 +76,36 @@ sunMesh.scale.set(4000, 4000, 1); // サイズを少し小さくする
 sunMesh.position.set(10000, 0, 0);
 scene.add(sunMesh);
 
-// Lensflare (公式サンプル) の設定
-const lensflare = new Lensflare();
-const flare0 = textureLoader.load("textures/lensflare/flare0.jpg");
-const flare1 = textureLoader.load("textures/lensflare/flare1.jpg");
-const flare2 = textureLoader.load("textures/lensflare/flare2.jpg");
-const flare3 = textureLoader.load("textures/lensflare/flare3.jpg");
-const flare4 = textureLoader.load("textures/lensflare/flare4.jpg");
-const flare5 = textureLoader.load("textures/lensflare/flare5.jpg");
-const flare6 = textureLoader.load("textures/lensflare/flare6.jpg");
-const flare7 = textureLoader.load("textures/lensflare/flare7.jpg");
+// レンズフレアの設定
+const lensFlare = new Lensflare();
+const flareTextures = [
+  { tex: "flare0.jpg", size: 2000, dist: 0 },
+  { tex: "flare1.jpg", size: 2500, dist: 0 },
+  { tex: "flare3.jpg", size: 2500, dist: 0.0 },
+  { tex: "flare5.jpg", size: 2500, dist: 0.1 },
+  { tex: "flare6.jpg", size: 1250, dist: 0.0 },
+  { tex: "flare7.jpg", size: 1250, dist: 0.0 },
+  { tex: "flare2.jpg", size: 1250, dist: 0.4 },
+  { tex: "flare2.jpg", size: 2500, dist: 0.5 },
+  { tex: "flare2.jpg", size: 1250, dist: 0.6 },
+  { tex: "flare2.jpg", size: 1250, dist: 1.4 },
+  { tex: "flare2.jpg", size: 875, dist: 1.5 },
+  { tex: "flare2.jpg", size: 375, dist: 1.7 },
+  { tex: "flare2.jpg", size: 2500, dist: 1.9 },
+  { tex: "flare2.jpg", size: 250, dist: 2.0 },
+  { tex: "flare4.jpg", size: 3750, dist: 1.8 },
+];
+flareTextures.forEach((f) =>
+  lensFlare.addElement(
+    new LensflareElement(
+      textureLoader.load(`textures/lensflare/${f.tex}`),
+      f.size,
+      f.dist,
+    ),
+  ),
+);
 
-// フレアテクスチャを追加
-lensflare.addElement(new LensflareElement(flare0, 2000, 0));
-lensflare.addElement(new LensflareElement(flare1, 2500, 0));
-lensflare.addElement(new LensflareElement(flare3, 2500, 0.0));
-lensflare.addElement(new LensflareElement(flare5, 2500, 0.1));
-lensflare.addElement(new LensflareElement(flare6, 1250, 0.0));
-lensflare.addElement(new LensflareElement(flare7, 1250, 0.0));
-lensflare.addElement(new LensflareElement(flare2, 1250, 0.4));
-lensflare.addElement(new LensflareElement(flare2, 2500, 0.5));
-lensflare.addElement(new LensflareElement(flare2, 1250, 0.6));
-lensflare.addElement(new LensflareElement(flare2, 1250, 1.4));
-lensflare.addElement(new LensflareElement(flare2, 875, 1.5));
-lensflare.addElement(new LensflareElement(flare2, 375, 1.7));
-lensflare.addElement(new LensflareElement(flare2, 2500, 1.9));
-lensflare.addElement(new LensflareElement(flare2, 250, 2.0));
-lensflare.addElement(new LensflareElement(flare4, 3750, 1.8));
-
-pointLight.add(lensflare);
+pointLight.add(lensFlare);
 
 // 地球のテクスチャの読み込み
 const earthDiffuse = textureLoader.load("textures/solar/earth_diffuse.jpg");
@@ -131,9 +118,10 @@ const earthCloudTex = textureLoader.load("textures/solar/earth_clouds.jpg");
 const earthMaterial = new THREE.MeshStandardMaterial({
   map: earthDiffuse,
   normalMap: earthNormal,
+  normalScale: new THREE.Vector2(2, 2), // デコボコを強調
   roughnessMap: earthSpecular,
-  roughness: 1,
-  metalness: 0.0, // 非金属面として設定
+  roughness: 0.9,
+  metalness: 0.1, // 非金属面として設定
 });
 const earthGeo = new THREE.SphereGeometry(100, 64, 64);
 const earthMesh = new THREE.Mesh(earthGeo, earthMaterial);
@@ -158,15 +146,6 @@ earth.add(cloudMesh);
 scene.add(earth);
 camera.lookAt(new THREE.Vector3(10000, 0, 0)); // 太陽方向を見る
 
-earthMesh.rotation.y = 0;
-cloudMesh.rotation.y = 0;
-earthMesh.castShadow = true;
-earthMesh.receiveShadow = true;
-// 雲にもシャドウ設定を適用
-cloudMesh.castShadow = true;
-cloudMesh.receiveShadow = true;
-const earthCloud = cloudMesh;
-
 // 月のテクスチャとマテリアルの設定
 const moonTexture = textureLoader.load("textures/solar/moon.jpg");
 const moonMaterial = new THREE.MeshStandardMaterial({
@@ -176,10 +155,27 @@ const moonMaterial = new THREE.MeshStandardMaterial({
 });
 const moonGeo = new THREE.SphereGeometry(20, 32, 32);
 const moonMesh = new THREE.Mesh(moonGeo, moonMaterial);
-moonMesh.position.set(0, 300, 0); // 月を地球の上側に移動
+// 月の中心にSpotLightを設置
+const moonSpotLight = new THREE.SpotLight(
+  0xffffff,
+  2,
+  200,
+  Math.PI / 4,
+  0.5,
+  2,
+);
+moonSpotLight.position.set(0, 0, 0);
+// 月の初期位置は地球の周囲に配置（x軸方向）
+const moonOrbitRadius = 300; // 地球から月までの距離
+let moonOrbitAngle = 0; // 月の公転角度
+moonMesh.position.set(moonOrbitRadius, 0, 0);
 
 const moon = new THREE.Group();
 moon.add(moonMesh);
+moon.add(moonSpotLight);
+moon.add(moonSpotLight.target);
+// moonの位置をearthと同じにする
+moon.position.copy(earth.position);
 scene.add(moon);
 
 // 星の作成 (Spriteでランダム散布)
@@ -189,21 +185,20 @@ const starMaterial = new THREE.SpriteMaterial({
   color: 0xffffff,
   transparent: true,
   blending: THREE.AdditiveBlending,
-  opacity: 0.7, // 透明度を追加して強度を下げる
 });
 for (let i = 0; i < 10000; i++) {
   const sprite = new THREE.Sprite(starMaterial);
   // ランダムな球面配置
-  const radius = rand(1000, 20000);
-  const phi = rand(0, Math.PI * 2);
-  const costheta = rand(-1, 1);
-  const sintheta = Math.sqrt(1 - costheta * costheta);
+  const radius = THREE.MathUtils.randFloat(1000, 20000);
+  const phi = THREE.MathUtils.randFloat(0, Math.PI * 2);
+  const cosTheta = THREE.MathUtils.randFloat(-1, 1);
+  const sinTheta = Math.sqrt(1 - cosTheta * cosTheta);
   sprite.position.set(
-    radius * sintheta * Math.cos(phi),
-    radius * costheta,
-    radius * sintheta * Math.sin(phi),
+    radius * sinTheta * Math.cos(phi),
+    radius * cosTheta,
+    radius * sinTheta * Math.sin(phi),
   );
-  const scaleVal = rand(2, 10);
+  const scaleVal = THREE.MathUtils.randFloat(2, 15);
   sprite.scale.set(scaleVal, scaleVal, 1);
   scene.add(sprite);
   stars.push(sprite);
@@ -214,51 +209,37 @@ window.addEventListener("resize", onWindowResize);
 
 animate();
 
-/**
- * アニメーションループ
- */
+/** アニメーションループ */
 function animate(): void {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
-
   controls.update();
-
-  // 地球の自転 - 速度を調整
   if (earth) {
-    earth.rotation.y -= 0.0005 * delta * 60; // 値を小さくして回転速度を遅く
-    if (earthCloud) {
-      earthCloud.rotation.y += 0.0002 * delta * 60; // 雲の回転も調整
-    }
+    earth.rotation.y -= 0.0005 * delta * 60;
+    if (cloudMesh) cloudMesh.rotation.y += 0.0002 * delta * 60;
   }
-  // 月の回転 - 速度を調整
   if (moon) {
-    moon.rotation.y += 0.0001 * delta * 60; // 値を小さくして回転速度を遅く
+    moonOrbitAngle += 0.001 * delta * 60;
+    moon.position.copy(earth.position);
+    moonMesh.position.set(
+      Math.cos(moonOrbitAngle) * moonOrbitRadius,
+      0,
+      Math.sin(moonOrbitAngle) * moonOrbitRadius,
+    );
+    moon.rotation.y += 0.0001 * delta * 60;
+    // SpotLightの向きを太陽方向に向ける
+    const sunPos = new THREE.Vector3(10000, 0, 0);
+    moonSpotLight.target.position.copy(moon.worldToLocal(sunPos.clone()));
   }
-
-  // 星の点滅
-  starMaterial.opacity = 0.85 + 0.15 * Math.random();
-
+  starMaterial.opacity = 0.7 + 0.3 * Math.random();
   renderer.render(scene, camera);
 }
 
-/**
- * ウィンドウサイズ変更時の処理
- */
+/** ウィンドウサイズ変更時の処理 */
 function onWindowResize(): void {
   const w = window.innerWidth;
   const h = window.innerHeight;
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
-}
-
-/**
- * 指定された範囲内の乱数を生成するユーティリティ関数
- *
- * @param min 最小値
- * @param max 最大値
- * @returns 生成された乱数
- */
-function rand(min: number, max: number): number {
-  return Math.random() * (max - min) + min;
 }
