@@ -10,12 +10,12 @@
     "format": "npx @biomejs/biome format --write ."
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.5"
+    "@biomejs/biome": "2.3.8",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.7"
   },
   "dependencies": {
-    "@types/three": "^0.176.0",
-    "three": "^0.176.0"
+    "@types/three": "^0.181.0",
+    "three": "^0.181.2"
   }
 }
