@@ -1,9 +1,10 @@
 import * as THREE from "three";
+import { WebGPURenderer } from "three/webgpu";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import {
-  Lensflare,
+  LensflareMesh,
   LensflareElement,
-} from "three/examples/jsm/objects/Lensflare.js";
+} from "three/examples/jsm/objects/LensflareMesh.js";
 
 const stars: THREE.Sprite[] = [];
 
@@ -24,10 +25,12 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(-300, 200, 300); // 地球の真後ろから少し斜めにずらす
 
 // レンダラーの設定
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new WebGPURenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 container.appendChild(renderer.domElement);
+
+await renderer.init();
 
 // OrbitControlsの初期化
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -77,7 +80,7 @@ sunMesh.position.set(10000, 0, 0);
 scene.add(sunMesh);
 
 // レンズフレアの設定
-const lensFlare = new Lensflare();
+const lensFlare = new LensflareMesh();
 const flareTextures = [
   { tex: "flare0.jpg", size: 2000, dist: 0 },
   { tex: "flare1.jpg", size: 2500, dist: 0 },
