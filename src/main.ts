@@ -1,12 +1,30 @@
 import * as THREE from "three";
 import { WebGPURenderer } from "three/webgpu";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { LensflareMesh, LensflareElement } from "three/examples/jsm/objects/LensflareMesh.js";
 import {
-  LensflareMesh,
-  LensflareElement,
-} from "three/examples/jsm/objects/LensflareMesh.js";
+  skyboxTextureUrls,
+  lensflareTextureUrls,
+  earthCloudsTextureUrl,
+  earthDiffuseTextureUrl,
+  earthNormalsTextureUrl,
+  earthSpecularTextureUrl,
+  moonTextureUrl,
+  starTextureUrl,
+  sunTextureUrl,
+} from "./assets";
 
 const stars: THREE.Sprite[] = [];
+const [
+  flare0TextureUrl,
+  flare1TextureUrl,
+  flare2TextureUrl,
+  flare3TextureUrl,
+  flare4TextureUrl,
+  flare5TextureUrl,
+  flare6TextureUrl,
+  flare7TextureUrl,
+] = lensflareTextureUrls;
 
 /** コンテナのDOM要素 */
 const container = document.getElementById("container")!;
@@ -16,12 +34,7 @@ const scene = new THREE.Scene();
 const clock = new THREE.Clock();
 
 // カメラの設定
-const camera = new THREE.PerspectiveCamera(
-  60,
-  window.innerWidth / window.innerHeight,
-  1,
-  50000,
-);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 50000);
 camera.position.set(-300, 200, 300); // 地球の真後ろから少し斜めにずらす
 
 // レンダラーの設定
@@ -55,18 +68,13 @@ scene.add(pointLight);
 
 // Skyboxの設定
 const cubeLoader = new THREE.CubeTextureLoader();
-scene.background = cubeLoader.load([
-  "textures/skybox/space_posX.jpg",
-  "textures/skybox/space_negX.jpg",
-  "textures/skybox/space_posY.jpg",
-  "textures/skybox/space_negY.jpg",
-  "textures/skybox/space_posZ.jpg",
-  "textures/skybox/space_negZ.jpg",
-]);
+scene.background = cubeLoader.load([...skyboxTextureUrls]);
+scene.background.colorSpace = THREE.SRGBColorSpace;
 
 // 太陽スプライトの作成
 const textureLoader = new THREE.TextureLoader();
-const sunTexture = textureLoader.load("textures/solar/sun.jpg");
+const sunTexture = textureLoader.load(sunTextureUrl);
+sunTexture.colorSpace = THREE.SRGBColorSpace;
 const sunMaterial = new THREE.SpriteMaterial({
   map: sunTexture,
   color: 0xffffcc, // 少し黄色味を加えて白さを抑える
@@ -82,40 +90,40 @@ scene.add(sunMesh);
 // レンズフレアの設定
 const lensFlare = new LensflareMesh();
 const flareTextures = [
-  { tex: "flare0.jpg", size: 2000, dist: 0 },
-  { tex: "flare1.jpg", size: 2500, dist: 0 },
-  { tex: "flare3.jpg", size: 2500, dist: 0.0 },
-  { tex: "flare5.jpg", size: 2500, dist: 0.1 },
-  { tex: "flare6.jpg", size: 1250, dist: 0.0 },
-  { tex: "flare7.jpg", size: 1250, dist: 0.0 },
-  { tex: "flare2.jpg", size: 1250, dist: 0.4 },
-  { tex: "flare2.jpg", size: 2500, dist: 0.5 },
-  { tex: "flare2.jpg", size: 1250, dist: 0.6 },
-  { tex: "flare2.jpg", size: 1250, dist: 1.4 },
-  { tex: "flare2.jpg", size: 875, dist: 1.5 },
-  { tex: "flare2.jpg", size: 375, dist: 1.7 },
-  { tex: "flare2.jpg", size: 2500, dist: 1.9 },
-  { tex: "flare2.jpg", size: 250, dist: 2.0 },
-  { tex: "flare4.jpg", size: 3750, dist: 1.8 },
+  { textureUrl: flare0TextureUrl, size: 2000, dist: 0 },
+  { textureUrl: flare1TextureUrl, size: 5000, dist: 0 },
+  { textureUrl: flare3TextureUrl, size: 2500, dist: 0.0 },
+  { textureUrl: flare5TextureUrl, size: 2500, dist: 0.1 },
+  { textureUrl: flare6TextureUrl, size: 1250, dist: 0.0 },
+  { textureUrl: flare7TextureUrl, size: 1250, dist: 0.0 },
+  { textureUrl: flare2TextureUrl, size: 1250, dist: 0.4 },
+  { textureUrl: flare2TextureUrl, size: 2500, dist: 0.5 },
+  { textureUrl: flare2TextureUrl, size: 1250, dist: 0.6 },
+  { textureUrl: flare2TextureUrl, size: 1250, dist: 1.4 },
+  { textureUrl: flare2TextureUrl, size: 875, dist: 1.5 },
+  { textureUrl: flare2TextureUrl, size: 375, dist: 1.7 },
+  { textureUrl: flare2TextureUrl, size: 2500, dist: 1.9 },
+  { textureUrl: flare2TextureUrl, size: 250, dist: 2.0 },
+  { textureUrl: flare4TextureUrl, size: 3750, dist: 1.8 },
 ];
-flareTextures.forEach((f) =>
-  lensFlare.addElement(
-    new LensflareElement(
-      textureLoader.load(`textures/lensflare/${f.tex}`),
-      f.size,
-      f.dist,
-    ),
-  ),
-);
+flareTextures.forEach((f) => {
+  const texture = textureLoader.load(f.textureUrl);
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  const element = new LensflareElement(texture, f.size, f.dist);
+  lensFlare.addElement(element);
+});
 
 pointLight.add(lensFlare);
 
 // 地球のテクスチャの読み込み
-const earthDiffuse = textureLoader.load("textures/solar/earth_diffuse.jpg");
-const earthNormal = textureLoader.load("textures/solar/earth_normals.jpg");
-const earthSpecular = textureLoader.load("textures/solar/earth_specular.jpg");
+const earthDiffuse = textureLoader.load(earthDiffuseTextureUrl);
+earthDiffuse.colorSpace = THREE.SRGBColorSpace;
+const earthNormal = textureLoader.load(earthNormalsTextureUrl);
+const earthSpecular = textureLoader.load(earthSpecularTextureUrl);
 // const earthNight = textureLoader.load("textures/solar/earth_night.jpg"); // TODO 夜のテクスチャーを使いたい
-const earthCloudTex = textureLoader.load("textures/solar/earth_clouds.jpg");
+const earthCloudTex = textureLoader.load(earthCloudsTextureUrl);
+earthCloudTex.colorSpace = THREE.SRGBColorSpace;
 
 // 地球マテリアルの設定 (MeshStandardMaterial)
 const earthMaterial = new THREE.MeshStandardMaterial({
@@ -137,10 +145,7 @@ const cloudMaterial = new THREE.MeshLambertMaterial({
   color: 0xf0f0f0, // 少し色を落として白さを抑える
   blending: THREE.AdditiveBlending,
 });
-const cloudMesh = new THREE.Mesh(
-  new THREE.SphereGeometry(100.5, 64, 64),
-  cloudMaterial,
-);
+const cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(100.5, 64, 64), cloudMaterial);
 
 // 地球グループの作成とシーンへの追加
 const earth = new THREE.Group();
@@ -150,7 +155,8 @@ scene.add(earth);
 camera.lookAt(new THREE.Vector3(10000, 0, 0)); // 太陽方向を見る
 
 // 月のテクスチャとマテリアルの設定
-const moonTexture = textureLoader.load("textures/solar/moon.jpg");
+const moonTexture = textureLoader.load(moonTextureUrl);
+moonTexture.colorSpace = THREE.SRGBColorSpace;
 const moonMaterial = new THREE.MeshStandardMaterial({
   map: moonTexture,
   roughness: 1.0,
@@ -159,14 +165,7 @@ const moonMaterial = new THREE.MeshStandardMaterial({
 const moonGeo = new THREE.SphereGeometry(20, 32, 32);
 const moonMesh = new THREE.Mesh(moonGeo, moonMaterial);
 // 月の中心にSpotLightを設置
-const moonSpotLight = new THREE.SpotLight(
-  0xffffff,
-  2,
-  200,
-  Math.PI / 4,
-  0.5,
-  2,
-);
+const moonSpotLight = new THREE.SpotLight(0xffffff, 2, 200, Math.PI / 4, 0.5, 2);
 moonSpotLight.position.set(0, 0, 0);
 // 月の初期位置は地球の周囲に配置（x軸方向）
 const moonOrbitRadius = 300; // 地球から月までの距離
@@ -182,7 +181,8 @@ moon.position.copy(earth.position);
 scene.add(moon);
 
 // 星の作成 (Spriteでランダム散布)
-const starTex = textureLoader.load("textures/solar/star.jpg");
+const starTex = textureLoader.load(starTextureUrl);
+starTex.colorSpace = THREE.SRGBColorSpace;
 const starMaterial = new THREE.SpriteMaterial({
   map: starTex,
   color: 0xffffff,

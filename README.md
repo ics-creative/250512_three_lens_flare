@@ -1,6 +1,19 @@
 # レンズフレアのデモ
 
-WebGPUとThree.jsに移植しました。
+WebGPU と Three.js に移植したレンズフレアのデモです。
+
+## 開発
+
+```bash
+npm install
+npm run dev
+```
+
+利用できるコマンド:
+
+- `npm run build`
+- `npm run lint`
+- `npm run format`
 
 # オリジナルはFlash
 
@@ -10,13 +23,14 @@ WebGPUとThree.jsに移植しました。
   - 3Dフレームワーク「Away3D 4.1.4 GOLD」をベース
   - 一部分（レンズフレアの箇所）は2Dフレームワーク「Starling 1.3」を利用
 
-
 # 素材
 
 以下のファイルは地球のテクスチャは有償の素材ですので、流用しないようにお願いします。
 
-- public/textures/solar
+- `src/assets/solar`
 
 レンズフレアの画像は、After EffectsとPhotoshopで作成したものです。
 
-- public/textures/lensflare
+- `src/assets/lensflare`
+
+skybox を含む画像アセットは `public` ではなく `src/assets` 配下から import しています。
