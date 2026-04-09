@@ -1,6 +1,6 @@
 # レンズフレアのデモ
 
-WebGLとThree.jsに移植しました。
+WebGPUとThree.jsに移植しました。
 
 # オリジナルはFlash
 
