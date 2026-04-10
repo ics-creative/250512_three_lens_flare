@@ -34,3 +34,9 @@ npm run dev
 - `src/assets/lensflare`
 
 skybox を含む画像アセットは `public` ではなく `src/assets` 配下から import しています。
+
+
+## Article
+
+- Ja: [エフェクト作成入門講座 Three\.js編 \- レンズフレア表現 \- ICS MEDIA](https://dev.ics.media/entry/476/)
+- En: [Lens flare effects in Three\.js \- ICS MEDIA](https://dev.ics.media/en/entry/476/)
